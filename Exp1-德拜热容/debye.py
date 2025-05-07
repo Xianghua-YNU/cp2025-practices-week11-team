@@ -66,13 +66,14 @@ def cv(T):
     float：热容值，单位：J/K
     """
     # 在这里实现热容计算
-    upper_limit = theta_D / T
+    u= theta_D / T
 
     # 使用高斯积分计算
-    integral = gauss_quadrature(integrand, 0, upper_limit, 50)
+    i=gauss_quadrature(integrand, 0, u, 50)
 
     # 计算热容
-    return 9 * V * rho * kB * (T / theta_D) ** 3 * integral
+    r=9 * V * rho * kB * (T / theta_D) ** 3 * i
+    return r,i,u
 
 
 def plot_cv():
@@ -80,9 +81,12 @@ def plot_cv():
     # 在这里实现绘图功能
     # 生成温度点（使用线性间距）
     T = np.linspace(5, 500, 200)
-
+    C_V = []
     # 计算对应的热容值
-    C_V = np.array([cv(t) for t in T])
+    for t in T:
+        r, _, _ = cv(t)
+        C_V.append(r)
+    C_V = np.array(C_V)
 
     # 创建图表
     plt.figure(figsize=(10, 6))
@@ -93,7 +97,8 @@ def plot_cv():
     # 添加参考线
     # 低温T^3行为
     T_low = np.linspace(5, 50, 50)
-    C_low = cv(50) * (T_low / 50) ** 3
+    r,i,u=cv(50)
+    C_low = r * (T_low / 50) ** 3
     plt.plot(T_low, C_low, 'r--', label='T³ Law')
 
     # Add labels and title
@@ -114,14 +119,14 @@ def plot_cv():
 def test_cv():
     """测试热容计算函数"""
     # 测试一些特征温度点的热容值
-    test_temperatures = [5, 100, 300, 500]
+    test_temperatures = [5, 50,100, 300, 500,1000]
     print("\n测试不同温度下的热容值：")
     print("-" * 40)
-    print("温度 (K)\t热容 (J/K)")
+    print("温度 (K)\t热容 (J/K)\t积分值\t积分上限")
     print("-" * 40)
     for T in test_temperatures:
-        result = cv(T)
-        print(f"{T:8.1f}\t{result:10.3e}")
+        f,s,t=cv(T)
+        print(f"{T:8.1f}\t{f:10.3e}\t{s:10.3e}\t{t:10.3e}")
 
 
 def main():
